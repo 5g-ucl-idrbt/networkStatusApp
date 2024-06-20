@@ -1,3 +1,4 @@
 # networkStatusApp
 
-![Screenshot_20240620-144844](https://github.com/5g-ucl-idrbt/networkStatusApp/assets/101712802/6b97fa5c-2cf0-4a49-a9f7-e7948f36c12d)
+![Screenshot_20240620-151551](https://github.com/5g-ucl-idrbt/networkStatusApp/assets/101712802/019d2900-56d9-4206-bb09-f1dee9cc56f3)
+
