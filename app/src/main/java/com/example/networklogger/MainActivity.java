@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        handler.postDelayed(updateTimeTask, 1000); // Start the update task every second
+        handler.post(updateTimeTask); // Start the update task
     }
 
     private Runnable updateTimeTask = new Runnable() {
@@ -89,9 +89,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateTotalConnectedTime() {
         if (isBound && connectionService != null) {
-            long totalConnectedTime = connectionService.getTotalConnectedTime();
-            connectedTime.setText("Total Connected Time: " + totalConnectedTime / 1000 + "s");
+            long totalConnectedTimeMillis = connectionService.getTotalConnectedTime();
+            String formattedTime = formatMillisToTime(totalConnectedTimeMillis);
+            connectedTime.setText("Total Connected Time: " + formattedTime);
         }
+    }
+
+    private String formatMillisToTime(long millis) {
+        long hours = millis / (1000 * 60 * 60);
+        long minutes = (millis % (1000 * 60 * 60)) / (1000 * 60);
+        long seconds = (millis % (1000 * 60)) / 1000;
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     private void updateHeartbeatWave(int year, int month, int dayOfMonth) {
