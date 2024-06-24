@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isBound = false;
     private Handler handler = new Handler();
     private NetworkChangeReceiver networkChangeReceiver = new NetworkChangeReceiver();
+    private long connectedTimeMillis = 0; // Variable to track connected time
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
             networkStatus.setText("Network Status: Connected");
             networkStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
             statusImage.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
+            connectedTimeMillis += 1000; // Increase connected time by 1 second
         } else {
             networkStatus.setText("Network Status: Disconnected");
             networkStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
@@ -88,11 +90,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateTotalConnectedTime() {
-        if (isBound && connectionService != null) {
-            long totalConnectedTimeMillis = connectionService.getTotalConnectedTime();
-            String formattedTime = formatMillisToTime(totalConnectedTimeMillis);
-            connectedTime.setText("Total Connected Time: " + formattedTime);
-        }
+        String formattedTime = formatMillisToTime(connectedTimeMillis);
+        connectedTime.setText("Total Connected Time: " + formattedTime);
     }
 
     private String formatMillisToTime(long millis) {
