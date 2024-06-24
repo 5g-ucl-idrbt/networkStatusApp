@@ -37,8 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            isBound
-                    = false;
+            isBound = false;
         }
     };
 
@@ -64,13 +63,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        handler.postDelayed(updateTimeTask, 1000);
+        handler.postDelayed(updateTimeTask, 1000); // Start the update task every second
     }
 
     private Runnable updateTimeTask = new Runnable() {
         public void run() {
             updateNetworkStatus();
-            handler.postDelayed(this, 1000);
+            updateTotalConnectedTime();
+            simulateDateSelection(); // Simulate date selection every second
+            handler.postDelayed(this, 1000); // Refresh every second
         }
     };
 
@@ -84,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
             networkStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
             statusImage.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
         }
+    }
+
+    private void updateTotalConnectedTime() {
         if (isBound && connectionService != null) {
             long totalConnectedTime = connectionService.getTotalConnectedTime();
             connectedTime.setText("Total Connected Time: " + totalConnectedTime / 1000 + "s");
@@ -97,6 +101,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void simulateDateSelection() {
+        // Get current date
+        Calendar currentDate = Calendar.getInstance();
+        int year = currentDate.get(Calendar.YEAR);
+        int month = currentDate.get(Calendar.MONTH);
+        int dayOfMonth = currentDate.get(Calendar.DAY_OF_MONTH);
+
+        // Set selected date programmatically
+        calendarView.setDate(currentDate.getTimeInMillis(), true, true);
+        updateHeartbeatWave(year, month, dayOfMonth); // Update heartbeat wave for the selected date
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -104,5 +120,6 @@ public class MainActivity extends AppCompatActivity {
             unbindService(connection);
             isBound = false;
         }
+        handler.removeCallbacks(updateTimeTask); // Remove callback when activity is destroyed
     }
 }
