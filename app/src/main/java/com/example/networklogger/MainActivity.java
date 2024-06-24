@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private NetworkChangeReceiver networkChangeReceiver = new NetworkChangeReceiver();
     private long connectedTimeMillis = 0; // Variable to track connected time
+    private boolean wasConnected = false; // Track previous network status
 
     private ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -71,22 +72,31 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             updateNetworkStatus();
             updateTotalConnectedTime();
-            simulateDateSelection(); // Simulate date selection every second
+            updateHeartbeatWaveBasedOnStatusChange(); // Update heartbeat wave based on status change
             handler.postDelayed(this, 1000); // Refresh every second
         }
     };
 
     private void updateNetworkStatus() {
-        if (networkChangeReceiver.isOnline(this)) {
+        boolean isConnected = networkChangeReceiver.isOnline(this);
+
+        if (isConnected && !wasConnected) {
+            // Transition: Disconnected -> Connected
             networkStatus.setText("Network Status: Connected");
             networkStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
             statusImage.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
-            connectedTimeMillis += 1000; // Increase connected time by 1 second
-        } else {
+        } else if (!isConnected && wasConnected) {
+            // Transition: Connected -> Disconnected
             networkStatus.setText("Network Status: Disconnected");
             networkStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
             statusImage.setBackgroundColor(getResources().getColor(android.R.color.holo_red_dark));
         }
+
+        if (isConnected) {
+            connectedTimeMillis += 1000; // Increase connected time by 1 second
+        }
+
+        wasConnected = isConnected; // Update previous status
     }
 
     private void updateTotalConnectedTime() {
@@ -101,23 +111,24 @@ public class MainActivity extends AppCompatActivity {
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
+    private void updateHeartbeatWaveBasedOnStatusChange() {
+        if (wasConnected) {
+            // Get current date
+            Calendar currentDate = Calendar.getInstance();
+            int year = currentDate.get(Calendar.YEAR);
+            int month = currentDate.get(Calendar.MONTH);
+            int dayOfMonth = currentDate.get(Calendar.DAY_OF_MONTH);
+
+            // Update heartbeat wave for the current date
+            updateHeartbeatWave(year, month, dayOfMonth);
+        }
+    }
+
     private void updateHeartbeatWave(int year, int month, int dayOfMonth) {
         if (isBound && connectionService != null) {
             List<ConnectionEvent> events = connectionService.getConnectionEventsForDate(year, month, dayOfMonth);
             heartbeatWaveView.setConnectionEvents(events);
         }
-    }
-
-    private void simulateDateSelection() {
-        // Get current date
-        Calendar currentDate = Calendar.getInstance();
-        int year = currentDate.get(Calendar.YEAR);
-        int month = currentDate.get(Calendar.MONTH);
-        int dayOfMonth = currentDate.get(Calendar.DAY_OF_MONTH);
-
-        // Set selected date programmatically
-        calendarView.setDate(currentDate.getTimeInMillis(), true, true);
-        updateHeartbeatWave(year, month, dayOfMonth); // Update heartbeat wave for the selected date
     }
 
     @Override
